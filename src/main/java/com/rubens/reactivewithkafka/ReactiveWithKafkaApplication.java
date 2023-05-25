@@ -11,7 +11,7 @@ public class ReactiveWithKafkaApplication {
 	public static KafkaTemplate template;
 
 	public void teste(String message) {
-		template.send("pica", new TestePerson("pinto", "bola"));
+		template.send("teste", new TestePerson("teste", "teste"));
 	}
 
 	public static void main(String[] args) {
