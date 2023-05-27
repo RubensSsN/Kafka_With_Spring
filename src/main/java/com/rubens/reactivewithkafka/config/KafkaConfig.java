@@ -1,7 +1,9 @@
 package com.rubens.reactivewithkafka.config;
 
-import com.rubens.reactivewithkafka.model.TestePerson;
-import com.rubens.reactivewithkafka.model.TesteRobos;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -14,18 +16,21 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.*;
+import org.springframework.kafka.core.ConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaAdmin;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.converter.RecordMessageConverter;
 import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 import org.springframework.kafka.support.mapping.DefaultJackson2JavaTypeMapper;
 import org.springframework.kafka.support.mapping.Jackson2JavaTypeMapper;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
-import org.springframework.kafka.support.serializer.StringOrBytesSerializer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import com.rubens.reactivewithkafka.model.TestePerson;
+import com.rubens.reactivewithkafka.model.TesteRobos;
 
 @Configuration
 @EnableKafka
@@ -40,7 +45,7 @@ public class KafkaConfig {
 
     private final Boolean createTopics;
 
-    private KafkaConfig(KafkaAdmin kafkaAdmin, KafkaProperties kafkaProperties, @Value("true") final Boolean createTopics) {
+    public KafkaConfig(KafkaAdmin kafkaAdmin, KafkaProperties kafkaProperties, @Value("true") final Boolean createTopics) {
         this.createTopics = Objects.requireNonNull(createTopics);
         this.kafkaProperties = Objects.requireNonNull(kafkaProperties);
         kafkaAdmin.setAutoCreate(createTopics);
@@ -51,9 +56,9 @@ public class KafkaConfig {
     public Map<String, Object> producerConfigs() {
         Map<String, Object> props = new HashMap<>(
                 kafkaProperties.buildProducerProperties());
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class); // Coloquei String ao invés de JSON sò para testes
         props.put(JsonSerializer.TYPE_MAPPINGS, "testeperson:com.rubens.reactivewithkafka.model.TestePerson, testerobos:com.rubens.reactivewithkafka.model.TesteRobos");
         return props;
     }
@@ -77,7 +82,7 @@ public class KafkaConfig {
                 StringDeserializer.class);
         props.put(
                 ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                JsonDeserializer.class);
+                StringDeserializer.class);   // Coloquei String ao invés de JSON sò para testes
         return new DefaultKafkaConsumerFactory<>(props);
     }
 
@@ -87,8 +92,7 @@ public class KafkaConfig {
 
         ConcurrentKafkaListenerContainerFactory<String, Object> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        factory.setMessageConverter(multiTypeConverter()); // Seta o conversor da mensagem recebida.
+        factory.setConsumerFactory(consumerFactory());// Seta o conversor da mensagem recebida.
         return factory;
     }
 
