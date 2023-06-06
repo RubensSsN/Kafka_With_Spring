@@ -13,7 +13,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -31,9 +33,13 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import com.rubens.reactivewithkafka.model.TestePerson;
 import com.rubens.reactivewithkafka.model.TesteRobos;
+import org.springframework.stereotype.Component;
 
+@Primary
+@Component
 @Configuration
 @EnableKafka
+@ComponentScan
 public class KafkaConfig {
 
     private static final Logger log = LoggerFactory.getLogger(KafkaConfig.class);
@@ -59,7 +65,6 @@ public class KafkaConfig {
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class); // Coloquei String ao invés de JSON sò para testes
-        props.put(JsonSerializer.TYPE_MAPPINGS, "testeperson:com.rubens.reactivewithkafka.model.TestePerson, testerobos:com.rubens.reactivewithkafka.model.TesteRobos");
         return props;
     }
 

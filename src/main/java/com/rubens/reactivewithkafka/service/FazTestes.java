@@ -18,16 +18,11 @@ import org.springframework.stereotype.Service;
 @EnableKafka
 public class FazTestes {
 
-    @Autowired
-    public KafkaTemplate template;
+
 
     @KafkaListener(topics = "WhatsApp", groupId = "Teste_spring", containerFactory = "kafkaListenerContainerFactory")
     public void consume(String message) {
-        System.out.println(message + "Deu certinho mané");
-    }
-
-    public void producer(String opa) {
-        template.send("WhatsApp", opa);
+        System.out.println(message + " Deu certinho mané");
     }
 
 }
