@@ -1,11 +1,14 @@
 package com.rubens.reactivewithkafka.service;
 
+import com.rubens.reactivewithkafka.config.KafkaConfig;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
@@ -16,17 +19,14 @@ import java.util.Scanner;
 @EnableKafka
 public class FazEnvio {
 
-//    @Autowired
-//    KafkaConfig config;
-
-    public void producer() {
-
+    public void producer() throws InterruptedException {
 
         var producers = new KafkaProducer<String, String>(properties());
 
         Scanner teclado = new Scanner(System.in);
 
-        System.out.println("Informe a mensagem");
+        Thread.sleep(5000);
+        System.out.println("Informe a mensagem: ");
         String value = teclado.next();
 
         var record = new ProducerRecord<String, String>("WhatsApp", value, value);
@@ -36,8 +36,14 @@ public class FazEnvio {
                 exception.printStackTrace();
                 return;
             }
-            System.out.println("Mensagem enviada com sucesso! " + metadata.topic() + ":::partition"
-                    + metadata.partition() + "/ offset " + metadata.offset() + "/ timestamp " + metadata.timestamp());
+            try {
+                System.out.println("Mensagem enviada com sucesso! " + metadata.topic() + ":::partition"
+                        + metadata.partition() + "/ offset " + metadata.offset() + "/ timestamp " + metadata.timestamp());
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
         });
 
     }
